@@ -96,7 +96,7 @@ const CharList = (props) => {
             return (
                 <Transition nodeRef={nodeRef} in={show} timeout={duration} key={item.id}>
                     {state => (
-                        <li ref={nodeRef} style={{
+                        <li style={{
                             ...defaultStyle,
                             ...transitionStyles[state]
                           }}

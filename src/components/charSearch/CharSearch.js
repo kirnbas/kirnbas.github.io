@@ -15,11 +15,12 @@ const CharSearch = () => {
         formState: { errors },
       } = useForm();
 
-    const {getCharacterByName} = useMarvelService();
+    const {process, setProcess, getCharacterByName} = useMarvelService();
 
     const onSubmit = (data) => {
         getCharacterByName(data.search)
-            .then(onCharLoaded);
+            .then(onCharLoaded)
+            .then(() => setProcess('confirmed'));
     };
 
     const onCharLoaded = (char) => {
@@ -51,7 +52,7 @@ const CharSearch = () => {
                     placeholder='Enter name' 
                     {...register("search", {required: true})}
                     onKeyUp={(e) => { if (e.key === "Enter" && e.target.value) onSubmit({ search: e.target.value }) }}></input>                
-                <button type="submit" className="button button__main">
+                <button type="submit" className="button button__main" disabled={process === 'loading'}>
                     <div className="inner">Find</div>
                 </button>                
                 <div className="information">

@@ -5,16 +5,13 @@ import { Helmet } from "react-helmet";
 import useMarvelService from '../../services/MarvelService';
 import AppBanner from '../appBanner/AppBanner';
 
-import Spinner from '../spinner/Spinner';
-import ErrorMessage from '../errorMessage/ErrorMessage';
 import './singleItemPage.scss';
+import setContent from '../../utils/setContent';
 
 const SingleItemPage = ({mode}) => {
-    console.log(mode);
-
     const {itemId} = useParams();
     const [item, setItem] = useState(null);
-    const {loading, error, getComic, getCharacter, clearError} = useMarvelService();
+    const {getComic, getCharacter, clearError, process, setProcess} = useMarvelService();
     const getItem = mode === "comic" ? getComic : getCharacter;
 
     useEffect(() => {
@@ -24,30 +21,24 @@ const SingleItemPage = ({mode}) => {
     const updateItem = () => {
         clearError();
         getItem(itemId)
-            .then(onItemLoaded);
+            .then(onItemLoaded)
+            .then(() => setProcess('confirmed'));
     }
 
     const onItemLoaded = (comic) => {
         setItem(comic);
     }
 
-    const errorMessage = error ? <ErrorMessage></ErrorMessage> : null;
-    const spinner = loading ? <Spinner></Spinner> : null;
-    const viewType = mode === "comic" ? <ComicView comic={item}></ComicView> : <CharView char={item}></CharView>;
-    const content = !(loading || error) && item ? viewType : null;
-
     return (
         <>
             <AppBanner></AppBanner>
-            {errorMessage}
-            {spinner}
-            {content}
+            {setContent(process, mode === "comic" ? ComicView : CharView, item )}
         </>
     )
 }
 
-const ComicView = ({comic}) => {
-    const {title, description, pageCount, thumbnail, language, price} = comic;    
+const ComicView = ({data}) => {
+    const {title, description, pageCount, thumbnail, language, price} = data;    
     const navigate = useNavigate();
 
     return (
@@ -72,8 +63,8 @@ const ComicView = ({comic}) => {
     )
 }
 
-const CharView = ({char}) => {
-    const {name, description, thumbnail} = char;    
+const CharView = ({data}) => {
+    const {name, description, thumbnail} = data;    
     const navigate = useNavigate();
 
     return (

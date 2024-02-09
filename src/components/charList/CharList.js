@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { Transition } from 'react-transition-group';
 
@@ -110,31 +110,23 @@ const CharList = (props) => {
             }, interval * (i + 1));
             
             return (
-                <Transition nodeRef={nodeRef} in={show} timeout={duration} key={item.id}>
-                    {state => (
-                        <li style={{
-                            ...defaultStyle,
-                            ...transitionStyles[state]
-                          }}
-                        className="char__item"
-                        tabIndex={0}
-                        ref={el => itemRefs.current[i] = el}
-                        key={item.id}
-                        onClick={() => {
+                <li className="char__item"
+                    tabIndex={0}
+                    ref={el => itemRefs.current[i] = el}
+                    key={item.id}
+                    onClick={() => {
+                        props.onCharSelected(item.id);
+                        focusOnItem(i);
+                    }}
+                    onKeyPress={(e) => {
+                        if (e.key === ' ' || e.key === "Enter") {
                             props.onCharSelected(item.id);
                             focusOnItem(i);
-                        }}
-                        onKeyPress={(e) => {
-                            if (e.key === ' ' || e.key === "Enter") {
-                                props.onCharSelected(item.id);
-                                focusOnItem(i);
-                            }
-                        }}>
-                            <img src={item.thumbnail} alt={item.name} style={imgStyle}/>
-                            <div className="char__name">{item.name}</div>
-                    </li>
-                    )}
-                </Transition>
+                        }
+                    }}>
+                        <img src={item.thumbnail} alt={item.name} style={imgStyle}/>
+                        <div className="char__name">{item.name}</div>
+                </li>
             )
         });
         // А эта конструкция вынесена для центровки спиннера/ошибки
@@ -145,9 +137,13 @@ const CharList = (props) => {
         )
     }
 
+    const elements = useMemo(() => {
+        return setContent(process, () => renderItems(charList), newItemLoading);
+    }, [process]);
+
     return (
         <div className="char__list">
-            {setContent(process, () => renderItems(charList), newItemLoading)}
+            {elements}
             <button 
                 className="button button__main button__long"
                 disabled={newItemLoading}
